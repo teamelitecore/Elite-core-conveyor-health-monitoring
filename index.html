@@ -1,0 +1,6609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>ELITE CORE — Intelligent Conveyor Monitoring</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+:root{
+--bg:#f5efe5;
+--panel:#fffdf8;
+--soft:#f3eadf;
+--border:#d7c8b4;
+--text:#3e3025;
+--muted:#806f5c;
+--brown:#76533b;
+--green:#3e8f62;
+--yellow:#c08a28;
+--red:#b7473e;
+--blue:#52799a;
+--shadow:0 8px 25px rgba(75,52,35,.08)
+}
+
+*{
+box-sizing:border-box
+}
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:var(--bg);
+color:var(--text)
+}
+
+button,input,select,textarea{
+font:inherit
+}
+
+button{
+cursor:pointer
+}
+
+
+/* HEADER */
+
+.header{
+height:72px;
+background:#fffaf2;
+border-bottom:1px solid var(--border);
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 25px;
+position:sticky;
+top:0;
+z-index:20
+}
+
+.brand{
+font-size:24px;
+font-weight:900;
+letter-spacing:2px;
+color:var(--brown)
+}
+
+.subtitle{
+font-size:12px;
+color:var(--muted);
+margin-top:4px
+}
+
+.header-right{
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap
+}
+
+.pill{
+padding:8px 12px;
+border-radius:20px;
+font-size:10px;
+font-weight:900;
+letter-spacing:.5px;
+background:#eee5d8;
+color:var(--muted)
+}
+
+.pill.live{
+background:#dcefe4;
+color:var(--green)
+}
+
+.pill.sim{
+background:#f8ebca;
+color:#946915
+}
+
+.pill.offline{
+background:#eadfda;
+color:var(--red)
+}
+
+
+/* LAYOUT */
+
+.layout{
+display:flex;
+min-height:calc(100vh - 72px)
+}
+
+.sidebar{
+width:245px;
+background:#fffaf2;
+border-right:1px solid var(--border);
+padding:18px 14px;
+flex-shrink:0
+}
+
+.side-title{
+font-size:10px;
+font-weight:900;
+color:var(--muted);
+letter-spacing:1.5px;
+margin:8px 10px 11px
+}
+
+.nav-btn{
+width:100%;
+border:0;
+background:transparent;
+color:var(--text);
+text-align:left;
+padding:11px 13px;
+border-radius:8px;
+margin-bottom:4px;
+font-size:13px;
+font-weight:700
+}
+
+.nav-btn:hover{
+background:#f1e8da
+}
+
+.nav-btn.active{
+background:#e6d8c6;
+color:var(--brown)
+}
+
+.side-divider{
+height:1px;
+background:var(--border);
+margin:18px 0
+}
+
+.conv-box{
+border:1px solid var(--border);
+border-radius:10px;
+padding:13px;
+background:var(--panel)
+}
+
+.conv-name{
+font-weight:900;
+font-size:13px
+}
+
+.conv-meta{
+font-size:11px;
+color:var(--muted);
+margin-top:4px
+}
+
+.mini-top{
+display:flex;
+justify-content:space-between;
+font-size:11px;
+font-weight:800;
+margin-top:12px
+}
+
+.mini-bar{
+height:7px;
+border-radius:10px;
+background:#e5dacb;
+overflow:hidden;
+margin-top:6px
+}
+
+.mini-fill{
+height:100%;
+transition:.3s
+}
+
+
+/* MAIN */
+
+.main{
+flex:1;
+padding:22px;
+min-width:0
+}
+
+.view{
+display:none
+}
+
+.view.active{
+display:block
+}
+
+.page-title{
+font-size:20px;
+font-weight:900;
+margin-bottom:4px
+}
+
+.page-description{
+font-size:12px;
+color:var(--muted);
+margin-bottom:18px
+}
+
+
+/* GRID */
+
+.grid{
+display:grid;
+gap:15px
+}
+
+.g2{
+grid-template-columns:repeat(2,minmax(0,1fr))
+}
+
+.g3{
+grid-template-columns:repeat(3,minmax(0,1fr))
+}
+
+.g5{
+grid-template-columns:repeat(5,minmax(0,1fr))
+}
+
+.g6{
+grid-template-columns:repeat(6,minmax(0,1fr))
+}
+
+
+/* PANELS */
+
+.panel,
+.kpi,
+.sensor-card,
+.control-panel{
+background:var(--panel);
+border:1px solid var(--border);
+border-radius:12px;
+box-shadow:var(--shadow);
+padding:17px
+}
+
+.panel-title{
+font-size:11px;
+font-weight:900;
+letter-spacing:1px;
+color:var(--brown);
+margin-bottom:13px
+}
+
+.section-title{
+display:flex;
+align-items:center;
+gap:12px;
+margin:22px 0 12px;
+font-size:11px;
+font-weight:900;
+letter-spacing:1.3px;
+color:var(--brown)
+}
+
+.section-title .line{
+height:1px;
+flex:1;
+background:var(--border)
+}
+
+
+/* BUTTONS */
+
+.control-row{
+display:flex;
+align-items:center;
+gap:9px;
+flex-wrap:wrap
+}
+
+.btn{
+border:1px solid var(--border);
+background:#fffaf2;
+color:var(--text);
+border-radius:7px;
+padding:9px 12px;
+font-size:10px;
+font-weight:900
+}
+
+.btn:hover{
+background:#eee2d2
+}
+
+.btn.primary{
+background:var(--brown);
+border-color:var(--brown);
+color:#fff
+}
+
+.btn.green{
+background:var(--green);
+border-color:var(--green);
+color:#fff
+}
+
+.btn.red{
+background:var(--red);
+border-color:var(--red);
+color:#fff
+}
+
+.btn.blue{
+background:var(--blue);
+border-color:var(--blue);
+color:#fff
+}
+
+.mode-label{
+margin-left:auto;
+font-size:10px;
+font-weight:900;
+color:#946915;
+background:#f8ebca;
+padding:7px 10px;
+border-radius:20px
+}
+
+
+/* CONSOLE */
+
+.console{
+display:grid;
+grid-template-columns:1fr 1.1fr;
+gap:15px;
+margin-bottom:15px
+}
+
+.console-panel{
+background:#2f261f;
+color:#fff7ea;
+border-radius:12px;
+padding:17px;
+box-shadow:var(--shadow)
+}
+
+.console-head{
+font-size:11px;
+letter-spacing:1.2px;
+color:#d4c1a9;
+font-weight:900
+}
+
+.console-head strong{
+color:#fff
+}
+
+.console-row{
+display:flex;
+justify-content:space-between;
+padding:6px 0;
+border-bottom:1px solid rgba(255,255,255,.08);
+font-size:12px
+}
+
+.console-row span{
+color:#bcae9e
+}
+
+.console-rule{
+height:1px;
+background:rgba(255,255,255,.12);
+margin:12px 0
+}
+
+.risk-row{
+display:flex;
+justify-content:space-between;
+align-items:center
+}
+
+.risk-label{
+font-size:11px;
+color:#bcae9e
+}
+
+.risk-value{
+font-size:18px;
+font-weight:900
+}
+
+.console-warning{
+margin-top:11px;
+font-size:11px;
+font-weight:900
+}
+
+.console-action{
+margin-top:12px;
+padding:10px;
+background:rgba(255,255,255,.06);
+border-radius:7px
+}
+
+.action-label{
+font-size:10px;
+color:#bcae9e;
+margin-bottom:4px
+}
+
+.action-text{
+font-size:12px;
+line-height:1.5
+}
+
+.console-footer{
+display:flex;
+justify-content:space-between;
+margin-top:12px;
+padding-top:10px;
+border-top:1px solid rgba(255,255,255,.1);
+font-size:10px;
+color:#bcae9e
+}
+
+
+/* SCENARIO */
+
+.scenario-box{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px
+}
+
+.field{
+display:flex;
+flex-direction:column;
+gap:5px
+}
+
+.field label{
+font-size:10px;
+font-weight:900;
+color:var(--muted)
+}
+
+.field select,
+.field input,
+.field textarea{
+border:1px solid var(--border);
+background:#fffaf2;
+border-radius:7px;
+padding:9px;
+color:var(--text);
+outline:none
+}
+
+.scenario-note{
+font-size:10px;
+color:var(--muted);
+line-height:1.5
+}
+
+
+/* SENSOR */
+
+.sensor-top{
+display:flex;
+justify-content:space-between;
+align-items:center
+}
+
+.sensor-name{
+font-size:11px;
+font-weight:900
+}
+
+.sensor-icon{
+width:30px;
+height:30px;
+border-radius:8px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#eee4d6
+}
+
+.sensor-value{
+font-size:23px;
+font-weight:900;
+margin-top:13px
+}
+
+.sensor-unit{
+font-size:10px;
+color:var(--muted)
+}
+
+.sensor-status{
+margin-top:7px;
+font-size:10px;
+font-weight:900
+}
+
+
+/* SENSOR RISK COLORS */
+
+.sensor-safe{
+color:var(--green)!important;
+font-weight:900
+}
+
+.sensor-near{
+color:var(--yellow)!important;
+font-weight:900
+}
+
+.sensor-danger{
+color:var(--red)!important;
+font-weight:900
+}
+
+
+/* ALERTS */
+
+.alert-panel{
+border:1px solid var(--border);
+border-radius:12px;
+background:var(--panel);
+box-shadow:var(--shadow);
+padding:17px
+}
+
+.alert-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:12px
+}
+
+.alert-title{
+font-size:11px;
+font-weight:900;
+letter-spacing:1px;
+color:var(--brown)
+}
+
+.alert-count{
+font-size:10px;
+font-weight:900;
+padding:5px 9px;
+border-radius:15px;
+background:#e8e0d7;
+color:var(--muted)
+}
+
+.alert{
+display:flex;
+gap:11px;
+align-items:flex-start;
+padding:11px;
+border-radius:8px;
+margin-bottom:8px;
+background:#fbf7ef;
+border:1px solid #eadfd1
+}
+
+.alert:last-child{
+margin-bottom:0
+}
+
+.alert-icon{
+font-size:17px;
+line-height:1
+}
+
+.alert-content{
+flex:1
+}
+
+.alert-name{
+font-size:11px;
+font-weight:900
+}
+
+.alert-message{
+font-size:10px;
+color:var(--muted);
+margin-top:4px;
+line-height:1.5
+}
+
+.alert-value{
+font-size:10px;
+font-weight:900;
+margin-top:4px
+}
+
+.alert.safe{
+border-left:4px solid var(--green)
+}
+
+.alert.near{
+border-left:4px solid var(--yellow)
+}
+
+.alert.danger{
+border-left:4px solid var(--red)
+}
+
+.alert.safe .alert-icon{
+color:var(--green)
+}
+
+.alert.near .alert-icon{
+color:var(--yellow)
+}
+
+.alert.danger .alert-icon{
+color:var(--red)
+}
+
+
+/* BADGES */
+
+.badge{
+display:inline-block;
+padding:4px 7px;
+border-radius:12px;
+font-size:9px;
+font-weight:900
+}
+
+.badge.green{
+background:#dcefe4;
+color:var(--green)
+}
+
+.badge.yellow{
+background:#f8ebca;
+color:#946915
+}
+
+.badge.red{
+background:#f5dcd8;
+color:var(--red)
+}
+
+.badge.gray{
+background:#e8e0d7;
+color:#77685a
+}
+
+
+/* TABLE */
+
+.table-wrap{
+overflow:auto
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:11px
+}
+
+th{
+text-align:left;
+color:var(--muted);
+background:#f3eadf;
+padding:10px;
+font-size:10px
+}
+
+td{
+padding:10px;
+border-bottom:1px solid #eadfd1
+}
+
+
+/* HEALTH */
+
+.health-wrap{
+display:grid;
+grid-template-columns:250px 1fr;
+gap:25px;
+align-items:center
+}
+
+.health-circle{
+width:190px;
+height:190px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:auto;
+background:conic-gradient(var(--green) 0deg,#eee4d6 0deg);
+position:relative
+}
+
+.health-circle:after{
+content:"";
+width:145px;
+height:145px;
+border-radius:50%;
+background:var(--panel);
+position:absolute
+}
+
+.health-number{
+position:relative;
+z-index:2;
+font-size:35px;
+font-weight:900
+}
+
+.health-word{
+position:absolute;
+z-index:2;
+margin-top:62px;
+font-size:10px;
+font-weight:900;
+color:var(--muted)
+}
+
+
+/* CHART */
+
+.chart-wrap{
+height:280px;
+position:relative
+}
+
+.chart-buttons{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin-bottom:11px
+}
+
+.chart-btn{
+border:1px solid var(--border);
+background:#fffaf2;
+padding:6px 9px;
+border-radius:6px;
+font-size:9px;
+font-weight:900
+}
+
+.chart-btn.active{
+background:var(--brown);
+color:#fff
+}
+
+
+/* ROOT CAUSE */
+
+.timeline-item{
+display:flex;
+gap:12px;
+margin-bottom:14px
+}
+
+.timeline-dot{
+width:12px;
+height:12px;
+border-radius:50%;
+background:var(--brown);
+margin-top:3px;
+flex-shrink:0
+}
+
+.timeline-time{
+font-size:10px;
+color:var(--muted)
+}
+
+.timeline-text{
+font-size:11px;
+font-weight:700;
+margin-top:3px
+}
+
+.cause-card{
+border:1px solid var(--border);
+border-radius:9px;
+padding:13px;
+margin-bottom:9px;
+background:#fffaf2
+}
+
+.cause-head{
+display:flex;
+justify-content:space-between;
+gap:10px
+}
+
+.cause-title{
+font-size:12px;
+font-weight:900
+}
+
+.cause-confidence{
+font-size:10px;
+font-weight:900
+}
+
+.cause-desc{
+font-size:11px;
+color:var(--muted);
+line-height:1.5;
+margin-top:7px
+}
+
+.evidence{
+margin-top:8px;
+padding-top:8px;
+border-top:1px solid var(--border);
+font-size:10px;
+line-height:1.7
+}
+
+
+/* BELT MAP */
+
+.belt-container{
+padding:35px 30px;
+position:relative
+}
+
+.belt{
+height:55px;
+border-radius:30px;
+background:repeating-linear-gradient(
+45deg,
+#4d443d,
+#4d443d 14px,
+#61574e 14px,
+#61574e 28px
+);
+border:5px solid #2e2925;
+position:relative
+}
+
+.belt-arrow{
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+color:#fff;
+font-size:24px;
+font-weight:900
+}
+
+.splice-marker{
+position:absolute;
+top:50%;
+transform:translate(-50%,-50%);
+width:28px;
+height:28px;
+border-radius:50%;
+background:var(--blue);
+border:4px solid #fff;
+box-shadow:0 2px 8px rgba(0,0,0,.25);
+cursor:pointer
+}
+
+.splice-marker.s1{
+left:25%
+}
+
+.splice-marker.s2{
+left:75%
+}
+
+.splice-marker:hover{
+transform:translate(-50%,-50%) scale(1.1)
+}
+
+.marker-label{
+position:absolute;
+top:-30px;
+left:50%;
+transform:translateX(-50%);
+font-size:10px;
+font-weight:900;
+white-space:nowrap;
+color:var(--text)
+}
+
+.map-scale{
+display:flex;
+justify-content:space-between;
+font-size:10px;
+color:var(--muted);
+margin-top:4px
+}
+
+.map-info{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px
+}
+
+.map-card{
+border:1px solid var(--border);
+border-radius:8px;
+padding:11px;
+background:#fffaf2
+}
+
+.map-card small{
+display:block;
+color:var(--muted);
+font-size:9px
+}
+
+.map-card strong{
+display:block;
+margin-top:5px;
+font-size:13px
+}
+
+
+/* REPLAY */
+
+.replay-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:13px
+}
+
+.replay-status{
+padding:8px 11px;
+border-radius:7px;
+background:#eee5d8;
+font-size:10px;
+font-weight:900
+}
+
+.replay-screen{
+background:#29221d;
+color:#fff8ed;
+border-radius:10px;
+padding:17px;
+margin:14px 0
+}
+
+.replay-time{
+font-size:25px;
+font-weight:900
+}
+
+.replay-condition{
+font-size:11px;
+margin-top:4px
+}
+
+.replay-sensors{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:8px;
+margin-top:14px
+}
+
+.replay-sensor{
+background:rgba(255,255,255,.07);
+border-radius:7px;
+padding:10px
+}
+
+.replay-sensor small{
+display:block;
+color:#bcae9e;
+font-size:8px
+}
+
+.replay-sensor strong{
+display:block;
+margin-top:5px;
+font-size:14px
+}
+
+.replay-progress{
+height:8px;
+background:#e6dacb;
+border-radius:10px;
+overflow:hidden
+}
+
+.replay-progress-fill{
+height:100%;
+background:var(--brown);
+width:0%
+}
+
+.replay-list{
+max-height:390px;
+overflow:auto;
+border:1px solid var(--border);
+border-radius:9px
+}
+
+.replay-row{
+display:grid;
+grid-template-columns:80px 90px 90px 90px 90px 90px 1fr;
+gap:5px;
+padding:9px;
+border-bottom:1px solid #eadfd1;
+font-size:9px;
+align-items:center
+}
+
+.replay-row.header{
+background:#f3eadf;
+font-weight:900;
+color:var(--muted);
+position:sticky;
+top:0
+}
+
+.replay-row.current{
+background:#eee2d2
+}
+
+.replay-empty{
+padding:25px;
+text-align:center;
+color:var(--muted);
+font-size:11px
+}
+
+
+/* WHAT IF */
+
+.slider-row{
+margin-bottom:17px
+}
+
+.slider-label{
+display:flex;
+justify-content:space-between;
+font-size:11px;
+font-weight:800;
+margin-bottom:7px
+}
+
+input[type=range]{
+width:100%;
+accent-color:var(--brown)
+}
+
+.whatif-result{
+text-align:center;
+padding:25px
+}
+
+.whatif-score{
+font-size:52px;
+font-weight:900
+}
+
+.whatif-state{
+font-size:12px;
+font-weight:900;
+margin-top:5px
+}
+
+
+/* NOTES */
+
+.form-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px
+}
+
+.field.full{
+grid-column:1/-1
+}
+
+.field textarea{
+min-height:80px;
+resize:vertical
+}
+
+.note{
+border:1px solid var(--border);
+border-radius:8px;
+padding:12px;
+background:#fffaf2;
+margin-top:9px
+}
+
+.note-top{
+display:flex;
+justify-content:space-between;
+font-size:10px;
+font-weight:900
+}
+
+.note-body{
+margin-top:8px;
+font-size:11px;
+line-height:1.5;
+color:var(--muted)
+}
+
+.note-action{
+margin-top:6px;
+font-size:10px
+}
+
+
+/* FOOTER */
+
+.footer-note{
+margin-top:15px;
+padding:12px;
+border:1px dashed var(--border);
+border-radius:8px;
+font-size:10px;
+color:var(--muted);
+background:#fbf6ed
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:1200px){
+
+.g6{
+grid-template-columns:repeat(3,1fr)
+}
+
+.g5{
+grid-template-columns:repeat(3,1fr)
+}
+
+}
+
+@media(max-width:900px){
+
+.sidebar{
+width:190px
+}
+
+.console,
+.health-wrap{
+grid-template-columns:1fr
+}
+
+.g2,
+.g3{
+grid-template-columns:1fr
+}
+
+.g5,
+.g6{
+grid-template-columns:1fr
+}
+
+.replay-sensors{
+grid-template-columns:repeat(2,1fr)
+}
+
+.map-info{
+grid-template-columns:repeat(2,1fr)
+}
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header class="header">
+
+<div>
+
+<div class="brand">
+ELITE CORE
+</div>
+
+<div class="subtitle">
+Intelligent Conveyor Monitoring & Prediction
+</div>
+
+</div>
+
+
+<div class="header-right">
+
+<div id="systemStatus"
+class="pill offline">
+SYSTEM OFFLINE
+</div>
+
+<div class="pill sim">
+CV-01 • 1 m PROTOTYPE
+</div>
+
+</div>
+
+</header>
+
+
+<div class="layout">
+
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+<div class="side-title">
+MONITORING
+</div>
+
+<button class="nav-btn active"
+data-view="overview">
+Overview
+</button>
+
+<button class="nav-btn"
+data-view="health">
+Health Score
+</button>
+
+<button class="nav-btn"
+data-view="sensor">
+Sensor Fusion
+</button>
+
+<button class="nav-btn"
+data-view="trend">
+Trend
+</button>
+
+<button class="nav-btn"
+data-view="rootcause">
+Root Cause
+</button>
+
+<button class="nav-btn"
+data-view="map">
+Damage Map
+</button>
+
+<button class="nav-btn"
+data-view="replay">
+Replay / Event History
+</button>
+
+<button class="nav-btn"
+data-view="whatif">
+What-If Simulation
+</button>
+
+<button class="nav-btn"
+data-view="splice">
+Splice Monitoring
+</button>
+
+<button class="nav-btn"
+data-view="notes">
+Technician Notes
+</button>
+
+
+<div class="side-divider"></div>
+
+
+<div class="side-title">
+CONVEYOR
+</div>
+
+
+<div class="conv-box">
+
+<div class="conv-name">
+CV-01
+</div>
+
+<div class="conv-meta">
+1 meter prototype
+</div>
+
+<div class="mini-top">
+
+<span>
+System Status
+</span>
+
+<span id="sideStatus">
+OFFLINE
+</span>
+
+</div>
+
+</div>
+
+
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+
+<!-- OVERVIEW -->
+
+<section class="view active"
+id="view-overview">
+
+
+<div class="page-title">
+Conveyor Overview
+</div>
+
+<div class="page-description">
+Real-time prototype monitoring of conveyor belt and splice condition.
+</div>
+
+
+<!-- CONTROLS -->
+
+<div class="control-panel">
+
+<div class="control-row">
+
+<button class="btn green"
+onclick="startSimulation()">
+▶ Start Simulation
+</button>
+
+<button class="btn red"
+onclick="stopSimulation()">
+■ Stop Simulation
+</button>
+
+<button class="btn"
+onclick="clearHistory()">
+Clear Event History
+</button>
+
+<span class="mode-label">
+⚠ SIMULATION DATA
+</span>
+
+</div>
+
+</div>
+
+
+<br>
+
+
+<!-- SCENARIO -->
+
+<div class="panel">
+
+<div class="panel-title">
+FAULT SCENARIO SIMULATION
+</div>
+
+
+<div class="scenario-box">
+
+<div class="field">
+
+<label>
+SELECT OPERATING SCENARIO
+</label>
+
+<select id="scenarioSelect"
+onchange="changeScenario()">
+
+<option value="normal">
+Normal Operation
+</option>
+
+<option value="splice">
+Splice / Mechanical Fault
+</option>
+
+<option value="thermal">
+Thermal / Friction Rise
+</option>
+
+<option value="overload">
+Overload Condition
+</option>
+
+<option value="speed">
+Low-Speed / Drive Issue
+</option>
+
+<option value="critical">
+Combined Critical Event
+</option>
+
+</select>
+
+</div>
+
+
+<div class="scenario-note">
+
+<strong>
+Purpose:
+</strong>
+
+The simulator creates sensor patterns corresponding
+to possible conveyor conditions.
+
+<br><br>
+
+This is a demonstration model, not a trained
+industrial fault-diagnosis model.
+
+</div>
+
+</div>
+
+</div>
+
+
+<br>
+
+
+<!-- CONSOLE -->
+
+<div class="console">
+
+
+<div class="console-panel">
+
+<div class="console-head">
+CONVEYOR <strong>CV-01</strong>
+</div>
+
+<br>
+
+
+<div class="console-row">
+
+<span>
+System
+</span>
+
+<strong id="consoleSystem">
+OFFLINE
+</strong>
+
+</div>
+
+
+<div class="console-row">
+
+<span>
+Sensor stream
+</span>
+
+<strong id="consoleSensor">
+DISCONNECTED
+</strong>
+
+</div>
+
+
+<div class="console-row">
+
+<span>
+Monitoring
+</span>
+
+<strong id="consoleMonitoring">
+STANDBY
+</strong>
+
+</div>
+
+
+<div class="console-rule"></div>
+
+
+<div class="risk-row">
+
+<span class="risk-label">
+Overall Risk
+</span>
+
+<span class="risk-value"
+id="consoleRisk">
+--
+</span>
+
+</div>
+
+
+<div class="console-warning"
+id="consoleWarning">
+System waiting for sensor data.
+</div>
+
+
+<div class="console-action">
+
+<div class="action-label">
+Recommended Action
+</div>
+
+<div class="action-text"
+id="consoleAction">
+Start simulation or connect the ESP32 sensor gateway.
+</div>
+
+</div>
+
+
+<div class="console-footer">
+
+<span>
+Last update
+</span>
+
+<b id="lastUpdate">
+--
+</b>
+
+</div>
+
+</div>
+
+
+<!-- OVERALL SYSTEM HEALTH -->
+
+<div class="panel">
+
+<div class="panel-title">
+CURRENT CONDITION
+</div>
+
+
+<div id="overviewStatus"
+style="font-size:16px;font-weight:900">
+SYSTEM OFFLINE
+</div>
+
+
+<div id="overviewStatusText"
+style="font-size:11px;color:var(--muted);margin-top:8px">
+No sensor stream active.
+</div>
+
+
+<br>
+
+
+<div class="grid g2">
+
+
+<div class="kpi">
+
+<div class="kpi-label">
+Selected Scenario
+</div>
+
+<div class="kpi-value"
+style="font-size:16px"
+id="selectedScenarioLabel">
+Normal Operation
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-label">
+System State
+</div>
+
+<div class="kpi-value"
+style="font-size:16px"
+id="overviewState">
+OFFLINE
+</div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- LIVE SENSOR FUSION -->
+
+<div class="section-title">
+
+LIVE SENSOR FUSION
+
+<span class="line"></span>
+
+</div>
+
+
+<div class="grid g5">
+
+
+<!-- TEMPERATURE -->
+
+<div class="sensor-card">
+
+<div class="sensor-top">
+
+<div class="sensor-name">
+TEMPERATURE
+</div>
+
+<div class="sensor-icon">
+🌡
+</div>
+
+</div>
+
+<div class="sensor-value"
+id="sTemp">
+--
+</div>
+
+<div class="sensor-unit">
+°C
+</div>
+
+<div class="sensor-status"
+id="sTempStatus">
+OFFLINE
+</div>
+
+</div>
+
+
+<!-- SPEED -->
+
+<div class="sensor-card">
+
+<div class="sensor-top">
+
+<div class="sensor-name">
+SPEED
+</div>
+
+<div class="sensor-icon">
+↔
+</div>
+
+</div>
+
+<div class="sensor-value"
+id="sSpeed">
+--
+</div>
+
+<div class="sensor-unit">
+m/s
+</div>
+
+<div class="sensor-status"
+id="sSpeedStatus">
+OFFLINE
+</div>
+
+</div>
+
+
+<!-- LOAD -->
+
+<div class="sensor-card">
+
+<div class="sensor-top">
+
+<div class="sensor-name">
+LOAD
+</div>
+
+<div class="sensor-icon">
+⚖
+</div>
+
+</div>
+
+<div class="sensor-value"
+id="sLoad">
+--
+</div>
+
+<div class="sensor-unit">
+kg
+</div>
+
+<div class="sensor-status"
+id="sLoadStatus">
+OFFLINE
+</div>
+
+</div>
+
+
+<!-- ACOUSTIC -->
+
+<div class="sensor-card">
+
+<div class="sensor-top">
+
+<div class="sensor-name">
+ACOUSTIC
+</div>
+
+<div class="sensor-icon">
+🔊
+</div>
+
+</div>
+
+<div class="sensor-value"
+id="sAcoustic">
+--
+</div>
+
+<div class="sensor-unit">
+relative index
+</div>
+
+<div class="sensor-status"
+id="sAcousticStatus">
+OFFLINE
+</div>
+
+</div>
+
+
+<!-- VIBRATION -->
+
+<div class="sensor-card">
+
+<div class="sensor-top">
+
+<div class="sensor-name">
+VIBRATION
+</div>
+
+<div class="sensor-icon">
+〰
+</div>
+
+</div>
+
+<div class="sensor-value"
+id="sVibration">
+--
+</div>
+
+<div class="sensor-unit">
+g
+</div>
+
+<div class="sensor-status"
+id="sVibrationStatus">
+OFFLINE
+</div>
+
+</div>
+
+</div>
+
+
+<br>
+
+
+<!-- ACTIVE ALERTS -->
+
+<div class="alert-panel">
+
+<div class="alert-header">
+
+<div class="alert-title">
+ACTIVE SENSOR ALERTS
+</div>
+
+<div class="alert-count"
+id="alertCount">
+NO ALERTS
+</div>
+
+</div>
+
+
+<div id="alertList">
+
+<div class="alert safe">
+
+<div class="alert-icon">
+✓
+</div>
+
+<div class="alert-content">
+
+<div class="alert-name">
+System ready
+</div>
+
+<div class="alert-message">
+Start the simulation to monitor sensor thresholds.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<br>
+
+
+<!-- FINGERPRINT + LEGEND -->
+
+<div class="grid g2">
+
+
+<div class="panel">
+
+<div class="panel-title">
+FAILURE FINGERPRINT
+</div>
+
+<div id="fingerprintTitle"
+style="font-size:15px;font-weight:900">
+Waiting for data
+</div>
+
+<div id="fingerprintText"
+style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px">
+Start simulation to generate sensor conditions.
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div class="panel-title">
+SENSOR COLOUR LEGEND
+</div>
+
+
+<div style="font-size:11px;line-height:2">
+
+<div>
+
+<span style="color:var(--green);font-weight:900">
+●
+</span>
+
+Safe
+
+</div>
+
+
+<div>
+
+<span style="color:var(--yellow);font-weight:900">
+●
+</span>
+
+Near threshold
+
+</div>
+
+
+<div>
+
+<span style="color:var(--red);font-weight:900">
+●
+</span>
+
+Threshold crossed
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- HEALTH -->
+
+<section class="view"
+id="view-health">
+
+<div class="page-title">
+Belt Health Score
+</div>
+
+<div class="page-description">
+Combined sensor-based prototype health assessment.
+</div>
+
+
+<div class="panel">
+
+<div class="health-wrap">
+
+
+<div>
+
+<div class="health-circle"
+id="healthCircle">
+
+<div class="health-number"
+id="healthNumber">
+--
+</div>
+
+<div class="health-word"
+id="healthWord">
+OFFLINE
+</div>
+
+</div>
+
+</div>
+
+
+<div>
+
+<div class="panel-title">
+SENSOR-BASED HEALTH ASSESSMENT
+</div>
+
+<p style="font-size:12px;line-height:1.7;color:var(--muted)">
+
+The prototype combines temperature, vibration,
+load, acoustic activity and belt speed into an
+estimated health score.
+
+</p>
+
+
+<div class="grid g2">
+
+
+<div class="kpi">
+
+<div class="kpi-label">
+Health
+</div>
+
+<div class="kpi-value"
+id="healthLarge">
+--
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-label">
+Condition
+</div>
+
+<div class="kpi-value"
+style="font-size:17px"
+id="healthCondition">
+OFFLINE
+</div>
+
+</div>
+
+
+</div>
+
+
+<div class="footer-note">
+
+This is a threshold/rule-based prototype model.
+It is not yet a trained predictive-maintenance ML model.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SENSOR FUSION -->
+
+<section class="view"
+id="view-sensor">
+
+<div class="page-title">
+Sensor Fusion
+</div>
+
+<div class="page-description">
+Combined view of all five monitoring sensors.
+</div>
+
+
+<div class="panel">
+
+<div class="panel-title">
+SENSOR STATUS TABLE
+</div>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Time</th>
+<th>Temperature</th>
+<th>Vibration</th>
+<th>Load</th>
+<th>Speed</th>
+<th>Health</th>
+<th>Condition</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="sensorTableBody">
+
+<tr>
+
+<td colspan="7"
+style="text-align:center;color:var(--muted)">
+
+Start simulation to collect sensor data.
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<br>
+
+
+<div class="panel">
+
+<div class="panel-title">
+THRESHOLD REFERENCE
+</div>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Sensor</th>
+<th>Safe</th>
+<th>Near Threshold</th>
+<th>Threshold Crossed</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+<tr>
+
+<td>Temperature</td>
+
+<td class="sensor-safe">
+&lt; 40°C
+</td>
+
+<td class="sensor-near">
+40–45°C
+</td>
+
+<td class="sensor-danger">
+&gt; 45°C
+</td>
+
+</tr>
+
+
+<tr>
+
+<td>Vibration</td>
+
+<td class="sensor-safe">
+&lt; 0.40 g
+</td>
+
+<td class="sensor-near">
+0.40–0.50 g
+</td>
+
+<td class="sensor-danger">
+&gt; 0.50 g
+</td>
+
+</tr>
+
+
+<tr>
+
+<td>Load</td>
+
+<td class="sensor-safe">
+&lt; 0.65 kg
+</td>
+
+<td class="sensor-near">
+0.65–0.75 kg
+</td>
+
+<td class="sensor-danger">
+&gt; 0.75 kg
+</td>
+
+</tr>
+
+
+<tr>
+
+<td>Acoustic</td>
+
+<td class="sensor-safe">
+&lt; 55
+</td>
+
+<td class="sensor-near">
+55–65
+</td>
+
+<td class="sensor-danger">
+&gt; 65
+</td>
+
+</tr>
+
+
+<tr>
+
+<td>Speed</td>
+
+<td class="sensor-safe">
+&gt; 0.12 m/s
+</td>
+
+<td class="sensor-near">
+0.10–0.12
+</td>
+
+<td class="sensor-danger">
+&lt; 0.10
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- TREND -->
+
+<section class="view"
+id="view-trend">
+
+<div class="page-title">
+Sensor Trend
+</div>
+
+<div class="page-description">
+Time-series visualization of simulated sensor measurements.
+</div>
+
+
+<div class="panel">
+
+<div class="chart-buttons">
+
+<button class="chart-btn active"
+onclick="changeTrend('temperature',this)">
+Temperature
+</button>
+
+<button class="chart-btn"
+onclick="changeTrend('vibration',this)">
+Vibration
+</button>
+
+<button class="chart-btn"
+onclick="changeTrend('load',this)">
+Load
+</button>
+
+<button class="chart-btn"
+onclick="changeTrend('speed',this)">
+Speed
+</button>
+
+<button class="chart-btn"
+onclick="changeTrend('acoustic',this)">
+Acoustic
+</button>
+
+<button class="chart-btn"
+onclick="changeTrend('health',this)">
+Health %
+</button>
+
+</div>
+
+
+<div class="chart-wrap">
+
+<canvas id="trendChart"></canvas>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ROOT CAUSE -->
+
+<section class="view"
+id="view-rootcause">
+
+<div class="page-title">
+Root Cause Analysis
+</div>
+
+<div class="page-description">
+Possible causes are inferred from sensor combinations. Physical inspection is required for confirmation.
+</div>
+
+
+<div class="grid g2">
+
+
+<div class="panel">
+
+<div class="panel-title">
+EVENT CORRELATION
+</div>
+
+<div id="correlationTimeline">
+
+<div class="timeline-item">
+
+<div class="timeline-dot"></div>
+
+<div>
+
+<div class="timeline-time">
+SYSTEM
+</div>
+
+<div class="timeline-text">
+Waiting for sensor data.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div class="panel-title">
+POSSIBLE ROOT CAUSES
+</div>
+
+<div id="causeRows">
+
+<div class="cause-card">
+
+<div class="cause-title">
+Waiting for sensor data
+</div>
+
+<div class="cause-desc">
+Start simulation to generate evidence.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<br>
+
+
+<div class="panel">
+
+<div class="panel-title">
+SENSOR EVIDENCE
+</div>
+
+<div id="evidenceList"
+style="font-size:11px;line-height:1.8;color:var(--muted)">
+No sensor evidence available.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DAMAGE MAP -->
+
+<section class="view"
+id="view-map">
+
+<div class="page-title">
+Damage Map
+</div>
+
+<div class="page-description">
+Prototype belt-position visualization with two monitored splice locations.
+</div>
+
+
+<div class="panel">
+
+<div class="panel-title">
+1 METRE CONVEYOR BELT
+</div>
+
+
+<div class="belt-container">
+
+<div class="belt">
+
+<div class="belt-arrow">
+→
+</div>
+
+
+<div class="splice-marker s1"
+onclick="selectSplice(1)">
+
+<div class="marker-label">
+Splice 1
+</div>
+
+</div>
+
+
+<div class="splice-marker s2"
+onclick="selectSplice(2)">
+
+<div class="marker-label">
+Splice 2
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="map-scale">
+
+<span>0 m</span>
+<span>0.25 m</span>
+<span>0.50 m</span>
+<span>0.75 m</span>
+<span>1.0 m</span>
+
+</div>
+
+
+<br>
+
+
+<div class="map-info">
+
+
+<div class="map-card">
+
+<small>
+Splice 1
+</small>
+
+<strong id="mapSplice1">
+--
+</strong>
+
+</div>
+
+
+<div class="map-card">
+
+<small>
+Splice 2
+</small>
+
+<strong id="mapSplice2">
+--
+</strong>
+
+</div>
+
+
+<div class="map-card">
+
+<small>
+Selected
+</small>
+
+<strong id="mapSelected">
+Splice 1
+</strong>
+
+</div>
+
+
+<div class="map-card">
+
+<small>
+Localization
+</small>
+
+<strong>
+Prototype
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="footer-note">
+
+The prototype identifies splice-specific condition.
+Precise arbitrary fault localization can later use
+belt-position tracking and vision.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- REPLAY -->
+
+<section class="view"
+id="view-replay">
+
+<div class="page-title">
+Replay / Event History
+</div>
+
+<div class="page-description">
+Review previously recorded simulation states and replay the sensor sequence.
+</div>
+
+
+<div class="panel">
+
+<div class="replay-head">
+
+<div>
+
+<div class="panel-title">
+EVENT REPLAY
+</div>
+
+<div style="font-size:10px;color:var(--muted)">
+
+Recorded events:
+
+<strong id="eventCount">
+0
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="replay-status"
+id="replayStatus">
+READY
+</div>
+
+</div>
+
+
+<div class="control-row">
+
+<button class="btn blue"
+onclick="startReplay()">
+▶ Replay
+</button>
+
+<button class="btn"
+onclick="pauseReplay()">
+⏸ Pause
+</button>
+
+<button class="btn"
+onclick="resetReplay()">
+↺ Reset
+</button>
+
+<button class="btn red"
+onclick="clearHistory()">
+Clear History
+</button>
+
+</div>
+
+
+<div class="replay-screen">
+
+<div style="font-size:9px;color:#bcae9e">
+REPLAY POSITION
+</div>
+
+<div class="replay-time"
+id="replayTime">
+--
+</div>
+
+<div class="replay-condition"
+id="replayCondition">
+No event selected.
+</div>
+
+
+<div class="replay-sensors">
+
+<div class="replay-sensor">
+
+<small>
+TEMPERATURE
+</small>
+
+<strong id="rTemp">
+--
+</strong>
+
+</div>
+
+
+<div class="replay-sensor">
+
+<small>
+VIBRATION
+</small>
+
+<strong id="rVibration">
+--
+</strong>
+
+</div>
+
+
+<div class="replay-sensor">
+
+<small>
+LOAD
+</small>
+
+<strong id="rLoad">
+--
+</strong>
+
+</div>
+
+
+<div class="replay-sensor">
+
+<small>
+SPEED
+</small>
+
+<strong id="rSpeed">
+--
+</strong>
+
+</div>
+
+
+<div class="replay-sensor">
+
+<small>
+HEALTH
+</small>
+
+<strong id="rHealth">
+--
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="replay-progress">
+
+<div class="replay-progress-fill"
+id="replayProgress">
+</div>
+
+</div>
+
+
+<br>
+
+
+<div class="replay-list">
+
+<div class="replay-row header">
+
+<div>TIME</div>
+<div>TEMP</div>
+<div>VIBRATION</div>
+<div>LOAD</div>
+<div>SPEED</div>
+<div>HEALTH</div>
+<div>CONDITION</div>
+
+</div>
+
+
+<div id="replayRows">
+
+<div class="replay-empty">
+No recorded events yet.
+Start simulation first.
+</div>
+
+</div>
+
+</div>
+
+
+<div class="footer-note">
+
+Replay currently uses frontend-generated simulation history.
+Later it can replay timestamped ESP32/database records.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- WHAT IF -->
+
+<section class="view"
+id="view-whatif">
+
+<div class="page-title">
+What-If Simulation
+</div>
+
+<div class="page-description">
+Change operating conditions to estimate their effect on prototype health.
+</div>
+
+
+<div class="grid g2">
+
+
+<div class="panel">
+
+<div class="panel-title">
+OPERATING CONDITIONS
+</div>
+
+
+<div class="slider-row">
+
+<div class="slider-label">
+
+<span>
+Temperature
+</span>
+
+<span id="wfTempValue">
+35 °C
+</span>
+
+</div>
+
+<input type="range"
+min="20"
+max="70"
+value="35"
+id="wfTemp"
+oninput="updateWhatIf()">
+
+</div>
+
+
+<div class="slider-row">
+
+<div class="slider-label">
+
+<span>
+Load
+</span>
+
+<span id="wfLoadValue">
+0.45 kg
+</span>
+
+</div>
+
+<input type="range"
+min="0"
+max="1"
+step="0.01"
+value="0.45"
+id="wfLoad"
+oninput="updateWhatIf()">
+
+</div>
+
+
+<div class="slider-row">
+
+<div class="slider-label">
+
+<span>
+Speed
+</span>
+
+<span id="wfSpeedValue">
+0.20 m/s
+</span>
+
+</div>
+
+<input type="range"
+min="0"
+max="0.5"
+step="0.01"
+value="0.20"
+id="wfSpeed"
+oninput="updateWhatIf()">
+
+</div>
+
+
+<div class="slider-row">
+
+<div class="slider-label">
+
+<span>
+Vibration
+</span>
+
+<span id="wfVibrationValue">
+0.28 g
+</span>
+
+</div>
+
+<input type="range"
+min="0"
+max="0.8"
+step="0.01"
+value="0.28"
+id="wfVibration"
+oninput="updateWhatIf()">
+
+</div>
+
+
+<div class="slider-row">
+
+<div class="slider-label">
+
+<span>
+Acoustic
+</span>
+
+<span id="wfAcousticValue">
+42
+</span>
+
+</div>
+
+<input type="range"
+min="0"
+max="100"
+value="42"
+id="wfAcoustic"
+oninput="updateWhatIf()">
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div class="panel-title">
+ESTIMATED RESULT
+</div>
+
+<div class="whatif-result">
+
+<div class="whatif-score"
+id="whatIfScore">
+--
+</div>
+
+<div class="whatif-state"
+id="whatIfState">
+NORMAL
+</div>
+
+<div style="font-size:11px;color:var(--muted);margin-top:12px">
+Estimated health under selected conditions.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="footer-note">
+
+What-If is a simulation model for demonstration.
+It should not be presented as a validated physical prediction.
+
+</div>
+
+</section>
+
+
+<!-- SPLICE -->
+
+<section class="view"
+id="view-splice">
+
+<div class="page-title">
+Splice Monitoring
+</div>
+
+<div class="page-description">
+Individual condition monitoring for the two prototype belt splices.
+</div>
+
+
+<div class="panel">
+
+<div style="display:flex;gap:8px;margin-bottom:15px">
+
+<button class="btn primary splice-tab"
+id="spliceTab1"
+onclick="selectSplice(1)">
+SPLICE 1
+</button>
+
+<button class="btn splice-tab"
+id="spliceTab2"
+onclick="selectSplice(2)">
+SPLICE 2
+</button>
+
+</div>
+
+
+<div class="grid g3">
+
+
+<div class="kpi">
+
+<div class="kpi-label">
+Temperature
+</div>
+
+<div class="kpi-value"
+id="spliceTemp">
+--
+</div>
+
+<div class="kpi-status">
+°C
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-label">
+Vibration
+</div>
+
+<div class="kpi-value"
+id="spliceVibration">
+--
+</div>
+
+<div class="kpi-status">
+g
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-label">
+Splice Health
+</div>
+
+<div class="kpi-value"
+id="spliceHealth">
+--
+</div>
+
+<div class="kpi-status"
+id="spliceCondition">
+OFFLINE
+</div>
+
+</div>
+
+
+</div>
+
+
+<div class="footer-note"
+id="spliceExplanation">
+
+Start simulation to monitor splice condition.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- NOTES -->
+
+<section class="view"
+id="view-notes">
+
+<div class="page-title">
+Technician Notes
+</div>
+
+<div class="page-description">
+Record inspection observations and maintenance actions.
+</div>
+
+
+<div class="grid g2">
+
+
+<div class="panel">
+
+<div class="panel-title">
+ADD INSPECTION NOTE
+</div>
+
+
+<div class="form-grid">
+
+
+<div class="field">
+
+<label>
+Technician
+</label>
+
+<input id="noteTechnician"
+placeholder="Technician name">
+
+</div>
+
+
+<div class="field">
+
+<label>
+Splice
+</label>
+
+<select id="noteSplice">
+
+<option value="1">
+Splice 1
+</option>
+
+<option value="2">
+Splice 2
+</option>
+
+</select>
+
+</div>
+
+
+<div class="field full">
+
+<label>
+Observation
+</label>
+
+<textarea id="noteObservation"
+placeholder="Enter observed condition..."></textarea>
+
+</div>
+
+
+<div class="field full">
+
+<label>
+Action Taken
+</label>
+
+<textarea id="noteAction"
+placeholder="Enter maintenance action..."></textarea>
+
+</div>
+
+</div>
+
+
+<br>
+
+
+<button class="btn primary"
+onclick="saveNote()">
+Save Note
+</button>
+
+
+<div id="noteMessage"
+style="font-size:10px;color:var(--green);margin-top:8px">
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div class="panel-title">
+RECENT TECHNICIAN NOTES
+</div>
+
+<div id="notesList">
+
+<div style="font-size:11px;color:var(--muted)">
+No technician notes recorded.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="footer-note">
+
+Notes are currently stored in browser memory.
+Database storage will be added during backend integration.
+
+</div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+GLOBAL VARIABLES
+===================================================== */
+
+let simulationRunning=false;
+
+let simulationTimer=null;
+
+let selectedSplice=1;
+
+let currentScenario="normal";
+
+let lastSensorUpdate=null;
+
+let liveMode=false;
+
+let sensorData={
+temperature:null,
+speed:null,
+load:null,
+acoustic:null,
+vibration:null
+};
+
+
+let spliceData={
+1:{
+temperature:null,
+vibration:null,
+health:null
+},
+
+2:{
+temperature:null,
+vibration:null,
+health:null
+}
+};
+
+
+let trendHistory=[];
+
+let trendChart=null;
+
+let currentTrend="temperature";
+
+
+let replayEvents=[];
+
+let replayIndex=0;
+
+let replayTimer=null;
+
+let replayRunning=false;
+
+
+let technicianNotes=[];
+
+
+/* =====================================================
+NAVIGATION
+===================================================== */
+
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+
+btn.addEventListener("click",()=>{
+
+document.querySelectorAll(".nav-btn")
+.forEach(x=>x.classList.remove("active"));
+
+btn.classList.add("active");
+
+
+document.querySelectorAll(".view")
+.forEach(v=>v.classList.remove("active"));
+
+
+document.getElementById(
+"view-"+btn.dataset.view
+).classList.add("active");
+
+
+if(btn.dataset.view==="trend"){
+
+setTimeout(
+updateTrendChart,
+50
+);
+
+}
+
+
+if(btn.dataset.view==="replay"){
+
+displayReplayEvents();
+
+}
+
+
+if(btn.dataset.view==="rootcause"){
+
+updateRootCause();
+
+}
+
+});
+
+});
+
+
+/* =====================================================
+UTILITY
+===================================================== */
+
+function clamp(v,min,max){
+
+return Math.max(
+min,
+Math.min(max,v)
+);
+
+}
+
+
+function fmt(v,d=2){
+
+if(v===null || v===undefined){
+
+return "--";
+
+}
+
+return Number(v).toFixed(d);
+
+}
+
+
+function colorForScore(score){
+
+if(score===null){
+
+return "#806f5c";
+
+}
+
+if(score>=75){
+
+return "#3e8f62";
+
+}
+
+if(score>=50){
+
+return "#c08a28";
+
+}
+
+return "#b7473e";
+
+}
+
+
+function conditionForScore(score){
+
+if(score===null){
+
+return "OFFLINE";
+
+}
+
+if(score>=75){
+
+return "NORMAL";
+
+}
+
+if(score>=50){
+
+return "WARNING";
+
+}
+
+return "CRITICAL";
+
+}
+
+
+function classForCondition(condition){
+
+if(condition==="NORMAL"){
+
+return "green";
+
+}
+
+if(condition==="WARNING"){
+
+return "yellow";
+
+}
+
+if(condition==="CRITICAL"){
+
+return "red";
+
+}
+
+return "gray";
+
+}
+
+
+/* =====================================================
+SENSOR RISK
+===================================================== */
+
+function sensorRisk(sensor,value){
+
+if(
+value===null ||
+value===undefined
+){
+
+return "safe";
+
+}
+
+
+value=Number(value);
+
+
+switch(sensor){
+
+case "temperature":
+
+if(value>45){
+
+return "danger";
+
+}
+
+if(value>=40){
+
+return "near";
+
+}
+
+return "safe";
+
+
+case "vibration":
+
+if(value>0.50){
+
+return "danger";
+
+}
+
+if(value>=0.40){
+
+return "near";
+
+}
+
+return "safe";
+
+
+case "load":
+
+if(value>0.75){
+
+return "danger";
+
+}
+
+if(value>=0.65){
+
+return "near";
+
+}
+
+return "safe";
+
+
+case "acoustic":
+
+if(value>65){
+
+return "danger";
+
+}
+
+if(value>=55){
+
+return "near";
+
+}
+
+return "safe";
+
+
+case "speed":
+
+if(value<0.10){
+
+return "danger";
+
+}
+
+if(value<=0.12){
+
+return "near";
+
+}
+
+return "safe";
+
+}
+
+
+return "safe";
+
+}
+
+
+function applyRisk(element,sensor,value){
+
+if(!element){
+
+return;
+
+}
+
+
+element.classList.remove(
+"sensor-safe",
+"sensor-near",
+"sensor-danger"
+);
+
+
+let risk=
+sensorRisk(
+sensor,
+value
+);
+
+
+if(risk==="danger"){
+
+element.classList.add(
+"sensor-danger"
+);
+
+}
+
+else if(risk==="near"){
+
+element.classList.add(
+"sensor-near"
+);
+
+}
+
+else{
+
+element.classList.add(
+"sensor-safe"
+);
+
+}
+
+}
+
+
+/* =====================================================
+HEALTH
+===================================================== */
+
+function healthScore(data){
+
+if(
+data.temperature===null ||
+data.vibration===null ||
+data.load===null ||
+data.acoustic===null ||
+data.speed===null
+){
+
+return null;
+
+}
+
+
+let tempPenalty=
+Math.max(
+0,
+(data.temperature-30)/20*25
+);
+
+
+let vibrationPenalty=
+Math.max(
+0,
+(data.vibration-.20)/.60*30
+);
+
+
+let loadPenalty=
+Math.max(
+0,
+(data.load-.40)/.60*15
+);
+
+
+let acousticPenalty=
+Math.max(
+0,
+(data.acoustic-20)/80*15
+);
+
+
+let speedPenalty=
+Math.abs(
+data.speed-.20
+)/.30*5;
+
+
+return Math.round(
+clamp(
+100
+-tempPenalty
+-vibrationPenalty
+-loadPenalty
+-acousticPenalty
+-speedPenalty,
+0,
+100
+)
+);
+
+}
+
+
+/* =====================================================
+SCENARIO DATA
+===================================================== */
+
+function generateScenarioData(){
+
+let d={};
+
+
+if(currentScenario==="normal"){
+
+d.temperature=
+32.5+Math.random()*2-1;
+
+d.vibration=
+0.27+Math.random()*.06;
+
+d.load=
+0.42+Math.random()*.08;
+
+d.speed=
+0.20+Math.random()*.04-.02;
+
+d.acoustic=
+40+Math.random()*8;
+
+}
+
+
+else if(currentScenario==="splice"){
+
+d.temperature=
+39+Math.random()*5;
+
+d.vibration=
+0.40+Math.random()*.16;
+
+d.load=
+0.45+Math.random()*.12;
+
+d.speed=
+0.18+Math.random()*.04;
+
+d.acoustic=
+55+Math.random()*18;
+
+}
+
+
+else if(currentScenario==="thermal"){
+
+d.temperature=
+42+Math.random()*12;
+
+d.vibration=
+0.30+Math.random()*.12;
+
+d.load=
+0.45+Math.random()*.12;
+
+d.speed=
+0.19+Math.random()*.03;
+
+d.acoustic=
+45+Math.random()*15;
+
+}
+
+
+else if(currentScenario==="overload"){
+
+d.temperature=
+36+Math.random()*7;
+
+d.vibration=
+0.36+Math.random()*.16;
+
+d.load=
+0.68+Math.random()*.25;
+
+d.speed=
+0.17+Math.random()*.04;
+
+d.acoustic=
+50+Math.random()*18;
+
+}
+
+
+else if(currentScenario==="speed"){
+
+d.temperature=
+33+Math.random()*5;
+
+d.vibration=
+0.32+Math.random()*.14;
+
+d.load=
+0.45+Math.random()*.10;
+
+d.speed=
+0.06+Math.random()*.06;
+
+d.acoustic=
+45+Math.random()*15;
+
+}
+
+
+else if(currentScenario==="critical"){
+
+d.temperature=
+47+Math.random()*10;
+
+d.vibration=
+0.50+Math.random()*.22;
+
+d.load=
+0.75+Math.random()*.22;
+
+d.speed=
+0.05+Math.random()*.06;
+
+d.acoustic=
+65+Math.random()*25;
+
+}
+
+
+receiveSensorData(d);
+
+}
+
+
+/* =====================================================
+SCENARIO CHANGE
+===================================================== */
+
+function changeScenario(){
+
+currentScenario=
+document.getElementById(
+"scenarioSelect"
+).value;
+
+
+let labels={
+
+normal:"Normal Operation",
+
+splice:"Splice / Mechanical Fault",
+
+thermal:"Thermal / Friction Rise",
+
+overload:"Overload Condition",
+
+speed:"Low-Speed / Drive Issue",
+
+critical:"Combined Critical Event"
+
+};
+
+
+document.getElementById(
+"selectedScenarioLabel"
+).textContent=
+labels[currentScenario];
+
+
+if(simulationRunning){
+
+generateScenarioData();
+
+}
+
+}
+
+
+/* =====================================================
+START
+===================================================== */
+
+function startSimulation(){
+
+if(simulationRunning){
+
+return;
+
+}
+
+
+simulationRunning=true;
+
+
+setSystem(
+"SIMULATION",
+"sim"
+);
+
+
+document.getElementById(
+"consoleSystem"
+).textContent=
+"SIMULATION";
+
+
+document.getElementById(
+"consoleSensor"
+).textContent=
+"CONNECTED";
+
+
+document.getElementById(
+"consoleMonitoring"
+).textContent=
+"ACTIVE";
+
+
+generateScenarioData();
+
+
+simulationTimer=
+setInterval(
+generateScenarioData,
+1500
+);
+
+}
+
+
+/* =====================================================
+STOP
+===================================================== */
+
+function stopSimulation(){
+
+simulationRunning=false;
+
+
+if(simulationTimer){
+
+clearInterval(
+simulationTimer
+);
+
+simulationTimer=null;
+
+}
+
+
+setSystem(
+"SYSTEM OFFLINE",
+"offline"
+);
+
+
+document.getElementById(
+"consoleSystem"
+).textContent=
+"OFFLINE";
+
+document.getElementById(
+"overviewState"
+).textContent=
+"OFFLINE";
+
+document.getElementById(
+"overviewState"
+).style.color=
+"var(--red)";
+
+document.getElementById(
+"sideStatus"
+).textContent=
+"OFFLINE";
+
+document.getElementById(
+"sideStatus"
+).style.color=
+"var(--red)";
+
+
+document.getElementById(
+"consoleSensor"
+).textContent=
+"DISCONNECTED";
+
+
+document.getElementById(
+"consoleMonitoring"
+).textContent=
+"STANDBY";
+
+
+document.getElementById(
+"consoleRisk"
+).textContent=
+"--";
+
+
+document.getElementById(
+"consoleWarning"
+).textContent=
+"System waiting for sensor data.";
+
+
+document.getElementById(
+"consoleAction"
+).textContent=
+"Select a scenario and start simulation.";
+
+
+document.getElementById(
+"overviewStatus"
+).textContent=
+"SYSTEM OFFLINE";
+
+
+document.getElementById(
+"overviewStatusText"
+).textContent=
+"No sensor stream active.";
+
+
+document.getElementById(
+"lastUpdate"
+).textContent=
+"--";
+
+
+updateAlerts();
+
+}
+
+
+/* =====================================================
+SYSTEM STATUS
+===================================================== */
+
+function setSystem(text,className){
+
+let el=
+document.getElementById(
+"systemStatus"
+);
+
+el.textContent=text;
+
+el.className=
+"pill "+className;
+
+}
+
+/* =====================================================
+FUTURE ESP32 DATA BRIDGE
+===================================================== */
+
+function receiveSensorData(data){
+
+    if(!data){
+
+        console.warn("Sensor packet missing.");
+
+        return;
+
+    }
+
+
+    const temperature=Number(data.temperature);
+    const speed=Number(data.speed);
+    const load=Number(data.load);
+    const acoustic=Number(data.acoustic);
+    const vibration=Number(data.vibration);
+
+
+    if(
+        !Number.isFinite(temperature) ||
+        !Number.isFinite(speed) ||
+        !Number.isFinite(load) ||
+        !Number.isFinite(acoustic) ||
+        !Number.isFinite(vibration)
+    ){
+
+        console.warn(
+            "Invalid sensor packet received:",
+            data
+        );
+
+        return;
+
+    }
+
+
+    sensorData={
+
+        temperature:temperature,
+
+        speed:speed,
+
+        load:load,
+
+        acoustic:acoustic,
+
+        vibration:vibration
+
+    };
+
+
+    lastSensorUpdate=new Date();
+
+
+    updateSpliceData();
+
+    applyAll();
+
+
+    /* ===============================
+       LIVE SYSTEM STATUS
+    =============================== */
+
+    setSystem(
+        "SYSTEM LIVE",
+        "live"
+    );
+
+
+    document.getElementById(
+        "consoleSystem"
+    ).textContent=
+        "LIVE";
+
+
+    document.getElementById(
+        "consoleSensor"
+    ).textContent=
+        "CONNECTED";
+
+
+    document.getElementById(
+        "consoleMonitoring"
+    ).textContent=
+        "ACTIVE";
+
+
+    document.getElementById(
+        "overviewState"
+    ).textContent=
+        "LIVE";
+
+
+    document.getElementById(
+        "overviewState"
+    ).style.color=
+        "var(--green)";
+
+
+    document.getElementById(
+        "sideStatus"
+    ).textContent=
+        "LIVE";
+
+
+    document.getElementById(
+        "sideStatus"
+    ).style.color=
+        "var(--green)";
+
+
+    document.getElementById(
+        "overviewStatus"
+    ).textContent=
+        "SYSTEM LIVE";
+
+
+    document.getElementById(
+        "overviewStatusText"
+    ).textContent=
+        "Live sensor stream active.";
+
+
+    document.getElementById(
+        "lastUpdate"
+    ).textContent=
+        new Date().toLocaleTimeString();
+
+}
+
+async function fetchLiveSensorData(){
+
+    try{
+
+        const response = await fetch(
+            "http://127.0.0.1:5000/api/live"
+        );
+
+        if(!response.ok){
+            throw new Error("HTTP error " + response.status);
+        }
+
+        const data = await response.json();
+
+        console.log("FLASK LIVE DATA:", data);
+
+        if(
+            data.temperature !== null &&
+            data.vibration !== null &&
+            data.load !== null &&
+            data.speed !== null &&
+            data.acoustic !== null
+        ){
+
+            receiveSensorData(data);
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "FLASK CONNECTION ERROR:",
+            error
+        );
+
+    }
+setInterval(fetchLiveSensorData, 5000);
+}
+
+/* =====================================================
+BACKEND SENSOR HISTORY
+===================================================== */
+
+async function fetchSensorHistory(){
+
+    try{
+
+        const response = await fetch(
+            "http://127.0.0.1:5000/api/history?limit=100",
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+        if(!response.ok){
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        }
+
+        const result = await response.json();
+
+        console.log(
+            "FLASK SENSOR HISTORY:",
+            result
+        );
+
+        if(
+            result.success &&
+            Array.isArray(result.data)
+        ){
+
+            console.log(
+                "History records received:",
+                result.data.length
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "FLASK HISTORY ERROR:",
+            error
+        );
+
+    }
+
+}
+
+/* =====================================================
+LOAD BACKEND HISTORY INTO TREND
+===================================================== */
+
+async function loadBackendHistoryIntoTrend(){
+
+    try{
+
+        const response = await fetch(
+            "http://127.0.0.1:5000/api/history?limit=40",
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+        if(!response.ok){
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        }
+
+        const result = await response.json();
+
+        if(
+            !result.success ||
+            !Array.isArray(result.data)
+        ){
+
+            console.warn(
+                "Invalid backend history:",
+                result
+            );
+
+            return;
+
+        }
+
+        /*
+           Backend returns newest first.
+           Reverse it so the chart runs
+           from oldest → newest.
+        */
+
+        const history =
+            [...result.data].reverse();
+
+        trendHistory =
+            history.map(item => ({
+
+                time:
+                    new Date(
+                        item.timestamp
+                    ).toLocaleTimeString(),
+
+                temperature:
+                    Number(item.temperature),
+
+                vibration:
+                    Number(item.vibration),
+
+                load:
+                    Number(item.load),
+
+                speed:
+                    Number(item.speed),
+
+                acoustic:
+                    Number(item.acoustic),
+
+                health:
+                    healthScore({
+
+                        temperature:
+                            Number(item.temperature),
+
+                        vibration:
+                            Number(item.vibration),
+
+                        load:
+                            Number(item.load),
+
+                        speed:
+                            Number(item.speed),
+
+                        acoustic:
+                            Number(item.acoustic)
+
+                    })
+
+            }));
+
+        updateTrendChart();
+
+        console.log(
+            "TREND LOADED FROM FLASK:",
+            trendHistory
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "TREND HISTORY ERROR:",
+            error
+        );
+
+    }
+
+}
+
+/* ====================================================
+APPLY ALL
+===================================================== */
+
+function applyAll(){
+
+    let health =
+    healthScore(sensorData);
+
+    updateCards(health);
+
+    updateSensorCards();
+
+    updateSensorTable();
+
+    updateHealth(health);
+
+    updateConsole(health);
+
+    updateFingerprint(health);
+
+    updateRootCause();
+
+    updateSpliceData();
+
+    updateSpliceDisplay();
+
+    updateDamageMap();
+
+    updateAlerts();
+
+    addTrend(health);
+
+    addReplay(health);
+
+    updateLast();
+
+}
+
+/* =====================================================
+SIDE / HEALTH
+===================================================== */
+
+function updateCards(health){
+
+if(health===null){
+
+return;
+
+}
+
+
+document.getElementById(
+"overviewState"
+).textContent=
+conditionForScore(health);
+
+document.getElementById(
+"overviewState"
+).style.color=
+colorForScore(health);
+
+document.getElementById(
+"sideStatus"
+).textContent=
+conditionForScore(health);
+
+document.getElementById(
+"sideStatus"
+).style.color=
+colorForScore(health);
+
+}
+
+/* =====================================================
+SENSOR CARDS
+===================================================== */
+
+function updateSensorCards(){
+
+let items=[
+
+[
+"sTemp",
+"temperature",
+sensorData.temperature,
+1
+],
+
+[
+"sSpeed",
+"speed",
+sensorData.speed,
+2
+],
+
+[
+"sLoad",
+"load",
+sensorData.load,
+2
+],
+
+[
+"sAcoustic",
+"acoustic",
+sensorData.acoustic,
+0
+],
+
+[
+"sVibration",
+"vibration",
+sensorData.vibration,
+2
+]
+
+];
+
+
+items.forEach(x=>{
+
+let el=
+document.getElementById(
+x[0]
+);
+
+
+el.textContent=
+fmt(
+x[2],
+x[3]
+);
+
+
+applyRisk(
+el,
+x[1],
+x[2]
+);
+
+});
+
+
+let statuses={
+
+
+sTempStatus:
+
+sensorData.temperature>45
+
+?"THRESHOLD CROSSED"
+
+:
+
+sensorData.temperature>=40
+
+?"NEAR LIMIT"
+
+:
+
+"NORMAL",
+
+
+sSpeedStatus:
+
+sensorData.speed<.10
+
+?"THRESHOLD CROSSED"
+
+:
+
+sensorData.speed<=.12
+
+?"NEAR LIMIT"
+
+:
+
+"NORMAL",
+
+
+sLoadStatus:
+
+sensorData.load>.75
+
+?"THRESHOLD CROSSED"
+
+:
+
+sensorData.load>=.65
+
+?"NEAR LIMIT"
+
+:
+
+"NORMAL",
+
+
+sAcousticStatus:
+
+sensorData.acoustic>65
+
+?"THRESHOLD CROSSED"
+
+:
+
+sensorData.acoustic>=55
+
+?"NEAR LIMIT"
+
+:
+
+"NORMAL",
+
+
+sVibrationStatus:
+
+sensorData.vibration>.50
+
+?"THRESHOLD CROSSED"
+
+:
+
+sensorData.vibration>=.40
+
+?"NEAR LIMIT"
+
+:
+
+"NORMAL"
+
+};
+
+
+Object.keys(statuses).forEach(id=>{
+
+let el=
+document.getElementById(id);
+
+
+el.textContent=
+statuses[id];
+
+
+el.style.color=
+
+statuses[id]==="NORMAL"
+
+?"var(--green)"
+
+:
+
+statuses[id]==="NEAR LIMIT"
+
+?"var(--yellow)"
+
+:
+
+"var(--red)";
+
+});
+
+}
+
+
+/* =====================================================
+ACTIVE ALERT ENGINE
+===================================================== */
+
+function updateAlerts(){
+
+let alerts=[];
+
+
+/* TEMPERATURE */
+
+if(
+sensorData.temperature!==null
+){
+
+if(
+sensorData.temperature>45
+){
+
+alerts.push({
+
+type:"danger",
+
+icon:"🔴",
+
+name:"Temperature threshold crossed",
+
+message:"Temperature is above the prototype limit.",
+
+value:
+fmt(sensorData.temperature,1)+
+" °C"
+
+});
+
+}
+
+else if(
+sensorData.temperature>=40
+){
+
+alerts.push({
+
+type:"near",
+
+icon:"🟡",
+
+name:"Temperature approaching threshold",
+
+message:"Temperature is entering the warning range.",
+
+value:
+fmt(sensorData.temperature,1)+
+" °C"
+
+});
+
+}
+
+
+/* VIBRATION */
+
+if(
+sensorData.vibration>.50
+){
+
+alerts.push({
+
+type:"danger",
+
+icon:"🔴",
+
+name:"High vibration detected",
+
+message:"Vibration has crossed the prototype threshold.",
+
+value:
+fmt(sensorData.vibration,2)+
+" g"
+
+});
+
+}
+
+else if(
+sensorData.vibration>=.40
+){
+
+alerts.push({
+
+type:"near",
+
+icon:"🟡",
+
+name:"Vibration approaching threshold",
+
+message:"Mechanical vibration is increasing.",
+
+value:
+fmt(sensorData.vibration,2)+
+" g"
+
+});
+
+}
+
+
+/* LOAD */
+
+if(
+sensorData.load>.75
+){
+
+alerts.push({
+
+type:"danger",
+
+icon:"🔴",
+
+name:"High load detected",
+
+message:"Load has crossed the prototype threshold.",
+
+value:
+fmt(sensorData.load,2)+
+" kg"
+
+});
+
+}
+
+else if(
+sensorData.load>=.65
+){
+
+alerts.push({
+
+type:"near",
+
+icon:"🟡",
+
+name:"Load approaching threshold",
+
+message:"Mechanical loading is increasing.",
+
+value:
+fmt(sensorData.load,2)+
+" kg"
+
+});
+
+}
+
+
+/* ACOUSTIC */
+
+if(
+sensorData.acoustic>65
+){
+
+alerts.push({
+
+type:"danger",
+
+icon:"🔴",
+
+name:"Abnormal acoustic activity",
+
+message:"Acoustic activity has crossed the prototype threshold.",
+
+value:
+fmt(sensorData.acoustic,0)+
+" index"
+
+});
+
+}
+
+else if(
+sensorData.acoustic>=55
+){
+
+alerts.push({
+
+type:"near",
+
+icon:"🟡",
+
+name:"Acoustic activity increasing",
+
+message:"Acoustic activity is approaching the warning range.",
+
+value:
+fmt(sensorData.acoustic,0)+
+" index"
+
+});
+
+}
+
+
+/* SPEED */
+
+if(
+sensorData.speed<.10
+){
+
+alerts.push({
+
+type:"danger",
+
+icon:"🔴",
+
+name:"Low belt speed",
+
+message:"Belt speed is below the prototype limit.",
+
+value:
+fmt(sensorData.speed,2)+
+" m/s"
+
+});
+
+}
+
+else if(
+sensorData.speed<=.12
+){
+
+alerts.push({
+
+type:"near",
+
+icon:"🟡",
+
+name:"Belt speed approaching limit",
+
+message:"Belt speed is entering the low-speed warning range.",
+
+value:
+fmt(sensorData.speed,2)+
+" m/s"
+
+});
+
+}
+
+
+/* MULTI-SENSOR EVENT */
+
+let dangerCount=alerts.filter(
+x=>x.type==="danger"
+).length;
+
+
+if(
+dangerCount>=2
+){
+
+alerts.unshift({
+
+type:"danger",
+
+icon:"⚠",
+
+name:"Multiple abnormal parameters detected",
+
+message:
+"More than one sensor has crossed its prototype threshold. Inspect the conveyor condition.",
+
+value:
+dangerCount+
+" critical sensor conditions"
+
+});
+
+}
+
+
+/* DISPLAY */
+
+let list=
+document.getElementById(
+"alertList"
+);
+
+let count=
+document.getElementById(
+"alertCount"
+);
+
+
+if(
+sensorData.temperature===null
+){
+
+count.textContent=
+"NO ALERTS";
+
+list.innerHTML=`
+
+<div class="alert safe">
+
+<div class="alert-icon">
+✓
+</div>
+
+<div class="alert-content">
+
+<div class="alert-name">
+System ready
+</div>
+
+<div class="alert-message">
+Start the simulation to monitor sensor thresholds.
+</div>
+
+</div>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+if(!alerts.length){
+
+count.textContent=
+"0 ALERTS";
+
+list.innerHTML=`
+
+<div class="alert safe">
+
+<div class="alert-icon">
+✓
+</div>
+
+<div class="alert-content">
+
+<div class="alert-name">
+All monitored parameters normal
+</div>
+
+<div class="alert-message">
+No sensor is currently approaching or crossing the prototype thresholds.
+</div>
+
+</div>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+count.textContent=
+alerts.length+
+(alerts.length===1
+?" ALERT"
+:" ALERTS");
+
+
+list.innerHTML=
+alerts.map(a=>`
+
+<div class="alert ${a.type}">
+
+<div class="alert-icon">
+${a.icon}
+</div>
+
+<div class="alert-content">
+
+<div class="alert-name">
+${a.name}
+</div>
+
+<div class="alert-message">
+${a.message}
+</div>
+
+<div class="alert-value">
+Current value: ${a.value}
+</div>
+
+</div>
+
+</div>
+
+`).join("");
+
+}
+
+
+}
+
+/* =====================================================
+SENSOR TABLE
+===================================================== */
+
+function updateSensorTable(){
+
+if(sensorData.temperature===null){
+
+return;
+
+}
+
+
+let health=
+healthScore(sensorData);
+
+
+let condition=
+conditionForScore(health);
+
+
+let row=
+document.createElement("tr");
+
+
+row.innerHTML=`
+
+<td>
+${new Date().toLocaleTimeString()}
+</td>
+
+<td id="rowTemp">
+${fmt(sensorData.temperature,1)} °C
+</td>
+
+<td id="rowVibration">
+${fmt(sensorData.vibration,2)} g
+</td>
+
+<td id="rowLoad">
+${fmt(sensorData.load,2)} kg
+</td>
+
+<td id="rowSpeed">
+${fmt(sensorData.speed,2)} m/s
+</td>
+
+<td>
+${health}%
+</td>
+
+<td>
+
+<span class="badge ${
+classForCondition(condition)
+}">
+
+${condition}
+
+</span>
+
+</td>
+
+`;
+
+
+let body=
+document.getElementById(
+"sensorTableBody"
+);
+
+
+body.prepend(row);
+
+
+applyRisk(
+row.querySelector("#rowTemp"),
+"temperature",
+sensorData.temperature
+);
+
+
+applyRisk(
+row.querySelector("#rowVibration"),
+"vibration",
+sensorData.vibration
+);
+
+
+applyRisk(
+row.querySelector("#rowLoad"),
+"load",
+sensorData.load
+);
+
+
+applyRisk(
+row.querySelector("#rowSpeed"),
+"speed",
+sensorData.speed
+);
+
+
+while(body.children.length>25){
+
+body.removeChild(
+body.lastElementChild
+);
+
+}
+
+}
+
+
+/* =====================================================
+CONSOLE
+===================================================== */
+
+function updateConsole(health){
+
+    let condition = conditionForScore(health);
+
+    document.getElementById(
+        "consoleRisk"
+    ).textContent = condition;
+
+
+    /*
+    LIVE DATA vs SIMULATION
+    */
+
+    if(liveMode){
+
+        document.getElementById(
+            "overviewStatus"
+        ).textContent =
+        "SYSTEM LIVE — " + condition;
+
+        document.getElementById(
+            "overviewStatusText"
+        ).textContent =
+        "Live sensor data is being evaluated.";
+
+    }
+
+    else if(simulationRunning){
+
+        document.getElementById(
+            "overviewStatus"
+        ).textContent =
+        "SYSTEM SIMULATION — " + condition;
+
+        document.getElementById(
+            "overviewStatusText"
+        ).textContent =
+        "Five simulated sensor channels are being evaluated.";
+
+    }
+
+    else{
+
+        document.getElementById(
+            "overviewStatus"
+        ).textContent =
+        "SYSTEM OFFLINE";
+
+        document.getElementById(
+            "overviewStatusText"
+        ).textContent =
+        "No sensor stream active.";
+
+    }
+
+
+    /*
+    CONDITION MESSAGE
+    */
+
+    if(condition === "NORMAL"){
+
+        document.getElementById(
+            "consoleWarning"
+        ).textContent =
+        "✓ SENSOR CONDITIONS WITHIN PROTOTYPE LIMITS";
+
+        document.getElementById(
+            "consoleAction"
+        ).textContent =
+        "Continue monitoring.";
+
+    }
+
+    else if(condition === "WARNING"){
+
+        document.getElementById(
+            "consoleWarning"
+        ).textContent =
+        "⚠ SENSOR VALUE APPROACHING OR EXCEEDING LIMIT";
+
+        document.getElementById(
+            "consoleAction"
+        ).textContent =
+        "Inspect the affected parameter and monitor its trend.";
+
+    }
+
+    else if(condition === "CRITICAL"){
+
+        document.getElementById(
+            "consoleWarning"
+        ).textContent =
+        "⚠ HIGH-RISK SENSOR CONDITION";
+
+        document.getElementById(
+            "consoleAction"
+        ).textContent =
+        "Follow site safety procedure and inspect the conveyor.";
+
+    }
+
+}
+
+/* =====================================================
+HEALTH
+===================================================== */
+
+function updateHealth(health){
+
+if(health===null){
+
+return;
+
+}
+
+
+let color=
+colorForScore(health);
+
+
+document.getElementById(
+"healthCircle"
+).style.background=
+"conic-gradient("+
+color+
+" "+
+health*3.6+
+"deg,#eee4d6 0deg)";
+
+
+document.getElementById(
+"healthNumber"
+).textContent=
+health+"%";
+
+
+document.getElementById(
+"healthWord"
+).textContent=
+conditionForScore(health);
+
+
+document.getElementById(
+"healthWord"
+).style.color=
+color;
+
+
+document.getElementById(
+"healthLarge"
+).textContent=
+health+"%";
+
+
+document.getElementById(
+"healthCondition"
+).textContent=
+conditionForScore(health);
+
+
+document.getElementById(
+"healthCondition"
+).style.color=
+color;
+
+}
+
+
+/* =====================================================
+FINGERPRINT
+===================================================== */
+
+function updateFingerprint(health){
+
+let title=
+"NORMAL SENSOR SIGNATURE";
+
+
+let text=
+"All simulated sensor values are within the prototype normal operating range.";
+
+
+if(
+sensorData.vibration>=.40 &&
+sensorData.acoustic>=55
+){
+
+title=
+"MECHANICAL / SPLICE ABNORMALITY";
+
+
+text=
+"Vibration and acoustic activity are rising together. This pattern can indicate mechanical disturbance or splice-related degradation.";
+
+}
+
+
+else if(
+sensorData.temperature>=40
+){
+
+title=
+"THERMAL / FRICTION RISE";
+
+
+text=
+"Temperature is approaching or exceeding the prototype threshold. Possible friction or heating requires inspection.";
+
+}
+
+
+else if(
+sensorData.load>=.65
+){
+
+title=
+"HIGH LOAD CONDITION";
+
+
+text=
+"Load is approaching or exceeding the prototype threshold, increasing mechanical stress.";
+
+}
+
+
+else if(
+sensorData.speed<=.12
+){
+
+title=
+"LOW-SPEED CONDITION";
+
+
+text=
+"Belt speed is approaching the low-speed threshold and may indicate a drive or operating issue.";
+
+}
+
+
+document.getElementById(
+"fingerprintTitle"
+).textContent=
+title;
+
+
+document.getElementById(
+"fingerprintText"
+).textContent=
+text;
+
+}
+
+
+/* =====================================================
+ROOT CAUSE
+===================================================== */
+
+function updateRootCause(){
+
+if(sensorData.temperature===null){
+
+return;
+
+}
+
+
+let causes=[];
+
+
+if(
+sensorData.vibration>=.40 &&
+sensorData.acoustic>=55
+){
+
+causes.push({
+
+title:
+"Possible mechanical / splice-related degradation",
+
+conf:
+Math.round(
+clamp(
+60+
+(sensorData.vibration-.40)*180+
+(sensorData.acoustic-55)*.5,
+60,
+95
+)
+),
+
+evid:
+"Vibration "+
+fmt(sensorData.vibration,2)+
+" g and acoustic index "+
+fmt(sensorData.acoustic,0)+
+" are elevated together."
+
+});
+
+}
+
+
+if(
+sensorData.temperature>=40
+){
+
+causes.push({
+
+title:
+"Possible friction / thermal rise",
+
+conf:
+Math.round(
+clamp(
+60+
+(sensorData.temperature-40)*4,
+60,
+95
+)
+),
+
+evid:
+"Temperature "+
+fmt(sensorData.temperature,1)+
+" °C is approaching or above the prototype threshold."
+
+});
+
+}
+
+
+if(
+sensorData.load>=.65
+){
+
+causes.push({
+
+title:
+"Possible overload / excessive mechanical stress",
+
+conf:
+Math.round(
+clamp(
+60+
+(sensorData.load-.65)*70,
+60,
+95
+)
+),
+
+evid:
+"Load "+
+fmt(sensorData.load,2)+
+" kg is approaching or above the prototype threshold."
+
+});
+
+}
+
+
+if(
+sensorData.speed<=.12
+){
+
+causes.push({
+
+title:
+"Possible low-speed / drive condition",
+
+conf:70,
+
+evid:
+"Speed "+
+fmt(sensorData.speed,2)+
+" m/s is below the prototype normal operating band."
+
+});
+
+}
+
+
+if(!causes.length){
+
+causes.push({
+
+title:
+"No strong abnormal cause identified",
+
+conf:80,
+
+evid:
+"All monitored parameters are within the prototype safe range."
+
+});
+
+}
+
+
+document.getElementById(
+"causeRows"
+).innerHTML=
+
+causes.map(c=>`
+
+<div class="cause-card">
+
+<div class="cause-head">
+
+<div class="cause-title">
+${c.title}
+</div>
+
+<div class="cause-confidence">
+${c.conf}% indication
+</div>
+
+</div>
+
+<div class="cause-desc">
+Possible cause from sensor correlation; physical inspection is required for confirmation.
+</div>
+
+<div class="evidence">
+
+<strong>
+Evidence:
+</strong>
+
+${c.evid}
+
+</div>
+
+</div>
+
+`).join("");
+
+
+document.getElementById(
+"evidenceList"
+).innerHTML=`
+
+• Temperature:
+${fmt(sensorData.temperature,1)} °C
+
+<br>
+
+• Vibration:
+${fmt(sensorData.vibration,2)} g
+
+<br>
+
+• Load:
+${fmt(sensorData.load,2)} kg
+
+<br>
+
+• Speed:
+${fmt(sensorData.speed,2)} m/s
+
+<br>
+
+• Acoustic:
+${fmt(sensorData.acoustic,0)} index
+
+`;
+
+
+document.getElementById(
+"correlationTimeline"
+).innerHTML=
+
+[
+"Sensor stream received.",
+"Operating conditions evaluated.",
+...causes.map(
+x=>x.title+" indicated."
+),
+"Combined health score calculated."
+]
+
+.map((t,i)=>`
+
+<div class="timeline-item">
+
+<div class="timeline-dot"></div>
+
+<div>
+
+<div class="timeline-time">
+STEP ${i+1}
+</div>
+
+<div class="timeline-text">
+${t}
+</div>
+
+</div>
+
+</div>
+
+`).join("");
+
+}
+
+
+/* =====================================================
+SPLICE
+===================================================== */
+
+function updateSpliceData(){
+
+if(sensorData.temperature===null){
+
+return;
+
+}
+
+
+spliceData[1].temperature=
+sensorData.temperature+
+(Math.random()*1.2-.6);
+
+
+spliceData[1].vibration=
+sensorData.vibration+
+(Math.random()*.04-.02);
+
+
+spliceData[2].temperature=
+sensorData.temperature+
+(Math.random()*1.5-.4);
+
+
+spliceData[2].vibration=
+sensorData.vibration+
+(Math.random()*.05-.01);
+
+
+spliceData[1].health=
+spliceHealth(
+spliceData[1].temperature,
+spliceData[1].vibration
+);
+
+
+spliceData[2].health=
+spliceHealth(
+spliceData[2].temperature,
+spliceData[2].vibration
+);
+
+}
+
+
+function spliceHealth(temp,vibration){
+
+return Math.round(
+clamp(
+100
+-Math.max(0,temp-30)*2
+-Math.max(0,vibration-.20)*55,
+0,
+100
+)
+);
+
+}
+
+
+function selectSplice(n){
+
+selectedSplice=n;
+
+
+document.querySelectorAll(
+".splice-tab"
+).forEach(
+x=>x.classList.remove("primary")
+);
+
+
+document.getElementById(
+"spliceTab"+n
+).classList.add("primary");
+
+
+updateSpliceDisplay();
+
+updateDamageMap();
+
+}
+
+
+function updateSpliceDisplay(){
+
+let d=
+spliceData[selectedSplice];
+
+
+if(d.health===null){
+
+return;
+
+}
+
+
+document.getElementById(
+"spliceTemp"
+).textContent=
+fmt(d.temperature,1)+" °C";
+
+
+document.getElementById(
+"spliceVibration"
+).textContent=
+fmt(d.vibration,2)+" g";
+
+
+document.getElementById(
+"spliceHealth"
+).textContent=
+d.health+"%";
+
+
+document.getElementById(
+"spliceCondition"
+).textContent=
+conditionForScore(d.health);
+
+
+document.getElementById(
+"spliceCondition"
+).style.color=
+colorForScore(d.health);
+
+
+document.getElementById(
+"spliceExplanation"
+).textContent=
+"Splice "+
+selectedSplice+
+" currently shows "+
+conditionForScore(d.health).toLowerCase()+
+" condition based on simulated temperature and vibration.";
+
+}
+
+
+function updateDamageMap(){
+
+if(spliceData[1].health===null){
+
+return;
+
+}
+
+
+document.getElementById(
+"mapSplice1"
+).textContent=
+spliceData[1].health+
+"% — "+
+conditionForScore(
+spliceData[1].health
+);
+
+
+document.getElementById(
+"mapSplice2"
+).textContent=
+spliceData[2].health+
+"% — "+
+conditionForScore(
+spliceData[2].health
+);
+
+
+document.getElementById(
+"mapSelected"
+).textContent=
+"Splice "+
+selectedSplice;
+
+}
+
+
+/* =====================================================
+TREND
+===================================================== */
+
+function addTrend(health){
+
+trendHistory.push({
+
+time:
+new Date().toLocaleTimeString(),
+
+temperature:
+sensorData.temperature,
+
+vibration:
+sensorData.vibration,
+
+load:
+sensorData.load,
+
+speed:
+sensorData.speed,
+
+acoustic:
+sensorData.acoustic,
+
+health:health
+
+});
+
+
+if(trendHistory.length>40){
+
+trendHistory.shift();
+
+}
+
+
+updateTrendChart();
+
+}
+
+
+function changeTrend(type,button){
+
+currentTrend=type;
+
+
+document.querySelectorAll(
+".chart-btn"
+).forEach(
+b=>b.classList.remove("active")
+);
+
+
+button.classList.add("active");
+
+
+updateTrendChart();
+
+}
+
+
+function updateTrendChart(){
+
+let canvas=
+document.getElementById(
+"trendChart"
+);
+
+
+if(!canvas){
+
+return;
+
+}
+
+
+if(trendChart){
+
+trendChart.destroy();
+
+}
+
+
+trendChart=
+new Chart(
+canvas,
+{
+
+type:"line",
+
+data:{
+
+labels:
+trendHistory.map(
+x=>x.time
+),
+
+datasets:[{
+
+label:
+currentTrend.toUpperCase(),
+
+data:
+trendHistory.map(
+x=>x[currentTrend]
+),
+
+borderColor:"#76533b",
+
+backgroundColor:
+"rgba(118,83,59,.08)",
+
+borderWidth:2,
+
+fill:true,
+
+tension:.3,
+
+pointRadius:2
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+maintainAspectRatio:false,
+
+plugins:{
+
+legend:{
+display:false
+}
+
+}
+
+}
+
+}
+);
+
+}
+
+
+/* =====================================================
+REPLAY
+===================================================== */
+
+function addReplay(health){
+
+    if(!simulationRunning && !liveMode){
+
+        return;
+
+    }
+
+
+    replayEvents.push({
+
+        timestamp:new Date(),
+
+        temperature:sensorData.temperature,
+
+        vibration:sensorData.vibration,
+
+        load:sensorData.load,
+
+        speed:sensorData.speed,
+
+        acoustic:sensorData.acoustic,
+
+        health:health,
+
+        condition:
+        conditionForScore(health),
+
+        source:
+        liveMode
+        ? "LIVE"
+        : "SIMULATION"
+
+    });
+
+
+    if(replayEvents.length > 100){
+
+        replayEvents.shift();
+
+    }
+
+
+    document.getElementById(
+        "eventCount"
+    ).textContent =
+    replayEvents.length;
+
+
+    displayReplayEvents();
+
+}
+
+
+function displayReplayEvents(){
+
+let box=
+document.getElementById(
+"replayRows"
+);
+
+
+if(!box){
+
+return;
+
+}
+
+
+if(!replayEvents.length){
+
+box.innerHTML=`
+
+<div class="replay-empty">
+No recorded events yet.
+Start simulation first.
+</div>
+
+`;
+
+return;
+
+}
+
+
+box.innerHTML=
+
+replayEvents.map(
+(e,i)=>`
+
+<div class="replay-row ${
+i===replayIndex?"current":""
+}">
+
+<div>
+${e.timestamp.toLocaleTimeString()}
+</div>
+
+<div>
+${fmt(e.temperature,1)} °C
+</div>
+
+<div>
+${fmt(e.vibration,2)} g
+</div>
+
+<div>
+${fmt(e.load,2)} kg
+</div>
+
+<div>
+${fmt(e.speed,2)} m/s
+</div>
+
+<div>
+${e.health}%
+</div>
+
+<div>
+
+<span class="badge ${
+classForCondition(e.condition)
+}">
+
+${e.condition}
+
+</span>
+
+</div>
+
+</div>
+
+`
+).join("");
+
+}
+
+
+function startReplay(){
+
+if(!replayEvents.length){
+
+alert(
+"No replay events available. Start simulation first."
+);
+
+return;
+
+}
+
+
+if(replayRunning){
+
+return;
+
+}
+
+
+replayRunning=true;
+
+
+document.getElementById(
+"replayStatus"
+).textContent=
+"PLAYING";
+
+
+replayTimer=
+setInterval(()=>{
+
+
+if(
+replayIndex>=replayEvents.length
+){
+
+pauseReplay();
+
+return;
+
+}
+
+
+playReplayEvent(
+replayEvents[replayIndex]
+);
+
+
+replayIndex++;
+
+
+document.getElementById(
+"replayProgress"
+).style.width=
+Math.min(
+100,
+replayIndex/replayEvents.length*100
+)+"%";
+
+
+},700);
+
+}
+
+
+function pauseReplay(){
+
+replayRunning=false;
+
+
+if(replayTimer){
+
+clearInterval(
+replayTimer
+);
+
+replayTimer=null;
+
+}
+
+
+document.getElementById(
+"replayStatus"
+).textContent=
+"PAUSED";
+
+}
+
+
+function resetReplay(){
+
+pauseReplay();
+
+
+replayIndex=0;
+
+
+document.getElementById(
+"replayStatus"
+).textContent=
+"READY";
+
+
+document.getElementById(
+"replayTime"
+).textContent=
+"--";
+
+
+document.getElementById(
+"replayCondition"
+).textContent=
+"No event selected.";
+
+
+[
+"rTemp",
+"rVibration",
+"rLoad",
+"rSpeed",
+"rHealth"
+].forEach(id=>{
+
+document.getElementById(
+id
+).textContent=
+"--";
+
+});
+
+
+document.getElementById(
+"replayProgress"
+).style.width=
+"0%";
+
+
+displayReplayEvents();
+
+}
+
+
+function playReplayEvent(e){
+
+document.getElementById(
+"replayTime"
+).textContent=
+e.timestamp.toLocaleTimeString();
+
+
+document.getElementById(
+"replayCondition"
+).textContent=
+e.condition;
+
+
+document.getElementById(
+"replayCondition"
+).style.color=
+colorForScore(e.health);
+
+
+document.getElementById(
+"rTemp"
+).textContent=
+fmt(e.temperature,1)+" °C";
+
+
+document.getElementById(
+"rVibration"
+).textContent=
+fmt(e.vibration,2)+" g";
+
+
+document.getElementById(
+"rLoad"
+).textContent=
+fmt(e.load,2)+" kg";
+
+
+document.getElementById(
+"rSpeed"
+).textContent=
+fmt(e.speed,2)+" m/s";
+
+
+document.getElementById(
+"rHealth"
+).textContent=
+e.health+"%";
+
+
+displayReplayEvents();
+
+}
+
+
+function clearHistory(){
+
+pauseReplay();
+
+
+replayEvents=[];
+
+replayIndex=0;
+
+trendHistory=[];
+
+
+document.getElementById(
+"eventCount"
+).textContent=
+"0";
+
+
+displayReplayEvents();
+
+
+updateTrendChart();
+
+
+resetReplay();
+
+}
+
+
+/* =====================================================
+WHAT IF
+===================================================== */
+
+function updateWhatIf(){
+
+let t=
+Number(
+document.getElementById("wfTemp").value
+);
+
+
+let l=
+Number(
+document.getElementById("wfLoad").value
+);
+
+
+let s=
+Number(
+document.getElementById("wfSpeed").value
+);
+
+
+let v=
+Number(
+document.getElementById("wfVibration").value
+);
+
+
+let a=
+Number(
+document.getElementById("wfAcoustic").value
+);
+
+
+document.getElementById(
+"wfTempValue"
+).textContent=
+t.toFixed(0)+" °C";
+
+
+document.getElementById(
+"wfLoadValue"
+).textContent=
+l.toFixed(2)+" kg";
+
+
+document.getElementById(
+"wfSpeedValue"
+).textContent=
+s.toFixed(2)+" m/s";
+
+
+document.getElementById(
+"wfVibrationValue"
+).textContent=
+v.toFixed(2)+" g";
+
+
+document.getElementById(
+"wfAcousticValue"
+).textContent=
+a.toFixed(0);
+
+
+let h=
+healthScore({
+
+temperature:t,
+
+load:l,
+
+speed:s,
+
+vibration:v,
+
+acoustic:a
+
+});
+
+
+document.getElementById(
+"whatIfScore"
+).textContent=
+h+"%";
+
+
+document.getElementById(
+"whatIfScore"
+).style.color=
+colorForScore(h);
+
+
+document.getElementById(
+"whatIfState"
+).textContent=
+conditionForScore(h);
+
+
+document.getElementById(
+"whatIfState"
+).style.color=
+colorForScore(h);
+
+}
+
+
+/* =====================================================
+TECHNICIAN NOTES
+===================================================== */
+
+function saveNote(){
+
+let tech=
+document.getElementById(
+"noteTechnician"
+).value.trim();
+
+
+let sp=
+document.getElementById(
+"noteSplice"
+).value;
+
+
+let obs=
+document.getElementById(
+"noteObservation"
+).value.trim();
+
+
+let act=
+document.getElementById(
+"noteAction"
+).value.trim();
+
+
+if(!tech || !obs){
+
+alert(
+"Please enter technician name and observation."
+);
+
+return;
+
+}
+
+
+technicianNotes.push({
+
+technician:tech,
+
+splice:sp,
+
+observation:obs,
+
+action:act,
+
+time:
+new Date().toLocaleString()
+
+});
+
+
+document.getElementById(
+"noteTechnician"
+).value="";
+
+
+document.getElementById(
+"noteObservation"
+).value="";
+
+
+document.getElementById(
+"noteAction"
+).value="";
+
+
+document.getElementById(
+"noteMessage"
+).textContent=
+"✓ Note saved successfully.";
+
+
+displayNotes();
+
+}
+
+
+function displayNotes(){
+
+let b=
+document.getElementById(
+"notesList"
+);
+
+
+if(!technicianNotes.length){
+
+b.innerHTML=`
+
+<div style="
+font-size:11px;
+color:var(--muted)
+">
+No technician notes recorded.
+</div>
+
+`;
+
+return;
+
+}
+
+
+b.innerHTML=
+
+technicianNotes
+.slice()
+.reverse()
+.map(
+n=>`
+
+<div class="note">
+
+<div class="note-top">
+
+<span>
+${n.technician}
+— Splice ${n.splice}
+</span>
+
+<span>
+${n.time}
+</span>
+
+</div>
+
+
+<div class="note-body">
+
+<strong>
+Observation:
+</strong>
+
+${n.observation}
+
+</div>
+
+
+<div class="note-action">
+
+<strong>
+Action:
+</strong>
+
+${n.action || "No action recorded."}
+
+</div>
+
+</div>
+
+`
+).join("");
+
+}
+
+
+/* =====================================================
+LAST UPDATE
+===================================================== */
+
+function updateLast(){
+
+    if(!simulationRunning && !liveMode){
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "lastUpdate"
+    ).textContent =
+    new Date().toLocaleTimeString();
+
+}
+
+/* =====================================================
+INITIALIZATION
+===================================================== */
+
+selectSplice(1);
+
+displayNotes();
+
+updateWhatIf();
+
+updateTrendChart();
+
+</script>
+s
+</body>
+</html>
